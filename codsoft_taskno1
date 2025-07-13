@@ -1,0 +1,41 @@
+# Titanic Survival Prediction
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+# Load the dataset
+df = pd.read_csv('/mnt/data/Titanic-Dataset.csv')
+
+# Quick data inspection
+print(df.head())
+print(df.info())
+print(df.isnull().sum())
+
+# Handling missing values
+df['Age'].fillna(df['Age'].mean(), inplace=True)
+df['Embarked'].fillna(df['Embarked'].mode()[0], inplace=True)
+
+# Drop columns not useful for prediction
+df.drop(['Name', 'Ticket', 'Cabin', 'PassengerId'], axis=1, inplace=True)
+
+# Convert categorical variables into numeric
+df = pd.get_dummies(df, columns=['Sex', 'Embarked'], drop_first=True)
+
+# Define input features (X) and target variable (y)
+X = df.drop('Survived', axis=1)
+y = df['Survived']
+
+# Split into training and testing datasets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Build the Logistic Regression model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+# Predict on the test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
